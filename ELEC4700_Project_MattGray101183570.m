@@ -1,8 +1,8 @@
 % Milestone 1 Matt Gray 101183570 ELEC 4700 Project 
-set(0,'defaulttaxesfontsize', 20)
+set(0,'defaultaxesfontsize', 20)
 set(0, 'DefaultFigureWindowStyle', 'docked')
 set(0, 'DefaultLineLineWidth', 2)
-set(0, 'Defaulttaxeslinewidth', 2)
+set(0, 'Defaultaxeslinewidth', 2)
 
 set(0, 'DefaultFigureWindowStyle', 'docked')
 
@@ -24,6 +24,9 @@ InputParasR = 0;
 n_g = 3.5;
 vg = c_c/n_g * 1e2;
 Lambda = 1550e-9;
+
+RL = 0.9i;
+RR = 0.9i;
 
 plotN = 10;
 
@@ -72,7 +75,7 @@ hold off
 xlabel('z(\mum')
 ylabel('E_f')
 subplot(3,1,2)
-plot(z*1000, real*(Er), 'b');
+plot(z*1000, real(Er), 'b');
 xlabel('z(\mum)')
 ylabel('E_f')
 hold off
@@ -90,18 +93,18 @@ for i = 2:Nt
     time(i) = t;
 
     InputL(i) = Ef1(t, InputParasL);
-    InputR(i) = Ern(t, 0);
+    InputR(i) = ErN(t, 0);
 
-    Ef(1) = InputL(i);
-    Er(Nz) = InputR(i);
+    Ef(1) = InputL(i) + RL*Er(1);
+    Er(Nz) = InputR(i) + RR*Ef(Nz);
 
     Ef(2:Nz) = fsync * Ef(1:Nz-1);
     Er(1:Nz-1) = fsync * Er(2:Nz);
 
-    OutputR(i) = Ef(Nz);
-    OutputL(i) =  Er(1);
+    OutputR(i) = Ef(Nz)*(1-RR);
+    OutputL(i) =  Er(1)*(1-RL);
 
-    if mod(i, PlotN) == 0
+    if mod(i, plotN) == 0
         subplot(3,1,1)
         plot(z*10000, real(Ef), 'r'); hold on 
         plot(z*10000, imag(Ef), 'r--'); hold off
