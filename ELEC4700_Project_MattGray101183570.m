@@ -14,7 +14,7 @@ c_q = 1.60217653e-19;
 c_hb = 1.05457266913e-34;
 c_h = c_hb*2*pi;
 
-InputParasL.E0 = 1e5;
+InputParasL.E0 = 1e5; %Adjusts the amplitude of the wave
 InputParasL.we = 0;
 InputParasL.t0 = 2e-12;
 InputParasL.wg = 5e-13;
