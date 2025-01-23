@@ -160,5 +160,7 @@ for i = 2:Nt
         pause(0.01)
     end
 end
+fftOutput = fftshift(fft(OutputR));
+omega = fftshift(wspace(time));
 
 
