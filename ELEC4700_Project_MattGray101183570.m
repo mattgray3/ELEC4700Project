@@ -17,8 +17,8 @@ c_q = 1.60217653e-19; % electron charge
 c_hb = 1.05457266913e-34; %plancks constant
 c_h = c_hb*2*pi; %reduced plancks constant
 
-beta_r = 0; % Real Beta value Milestone 2
-beta_i = 0; % Imaginary Beta Value Milestone 2 
+beta_r = 0; % Real Beta value Milestone 2 Real component adds a "Twist"
+beta_i = 0; % Imaginary Beta Value Milestone 2 Imj component adds gain to the waveform
 
 %Input parameters for L and R constants
 InputParasL.E0 = 1e5; %Adjusts the amplitude of the wave
@@ -38,7 +38,7 @@ RR = 0.9i;
 
 plotN = 10; % frequency of plotting
 
-L =  1000e-6 * 1e2; %Len of sim
+L =  1000e-6 * 2e2; %Len of sim
 XL = [0, L]; % X and Y Axis limits
 YL = [0, InputParasL.E0];
 
