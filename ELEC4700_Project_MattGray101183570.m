@@ -38,7 +38,7 @@ RR = 0.9i;
 
 plotN = 10; % frequency of plotting
 
-L =  1000e-6 * 2e2; %Len of sim
+L =  1000e-6 * 1e2; %Len of sim
 XL = [0, L]; % X and Y Axis limits
 YL = [0, InputParasL.E0];
 
@@ -97,6 +97,7 @@ plot(time * 1e2, real(InputR), 'b'); hold on
 plot(time * 1e2, real(OutputR), 'b--'); 
 xlabel('time(ps)')
 ylabel('E')
+
 
 hold off
 
@@ -160,7 +161,17 @@ for i = 2:Nt
         pause(0.01)
     end
 end
+
 fftOutput = fftshift(fft(OutputR));
-omega = fftshift(wspace(time));
+omega =  fftshift(wspace(time));
+
+figure('Name', 'Bode Plot')
+subplot(2,1,1);
+plot(omega, abs(fftOutput), title('Magnitude Plot'));
+
+subplot(2,1,2);
+plot(omega, angle(fftOutput), title('Phase Plot'));
+
+
 
 
