@@ -17,6 +17,9 @@ c_q = 1.60217653e-19; % electron charge
 c_hb = 1.05457266913e-34; %plancks constant
 c_h = c_hb*2*pi; %reduced plancks constant
 
+beta_r = 0; % Real Beta value Milestone 2
+beta_i = 0; % Imaginary Beta Value Milestone 2 
+
 %Input parameters for L and R constants
 InputParasL.E0 = 1e5; %Adjusts the amplitude of the wave
 InputParasL.we = 0;
@@ -108,8 +111,13 @@ for i = 2:Nt
     Ef(1) = InputL(i) + RL*Er(1);
     Er(Nz) = InputR(i) + RR*Ef(Nz);
 
-    Ef(2:Nz) = fsync * Ef(1:Nz-1);
-    Er(1:Nz-1) = fsync * Er(2:Nz);
+    beta = ones(size(z)) * (beta_r + 1i * beta_i); %Milestone 2 Beta Equation
+    exp_det = exp(-1i * dz * beta); %Milestone 2 Exponent
+
+    Ef(2:Nz) = fsync * exp_det(1:Nz-1) .* Ef(1:Nz-1); % Edited Milestone 2
+    Er(1:Nz-1) = fsync * exp_det(2:Nz) .* Er(2:Nz); % Edited Milestone 2
+
+  
 
     OutputR(i) = Ef(Nz)*(1-RR);
     OutputL(i) =  Er(1)*(1-RL);
