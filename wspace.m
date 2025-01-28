@@ -1,4 +1,4 @@
-function w = wspace(t, nt);
+function w = wspace(t, nt)
 
 if(nargin < 2)
        nt = length(t);
@@ -6,7 +6,7 @@ if(nargin < 2)
        t = t(nt) - t(1) + dt;
 end
 
-if(nargin = 2)
+if(nargin == 2)
     dt = t/nt;
 end
 

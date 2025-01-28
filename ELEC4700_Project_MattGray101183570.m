@@ -1,4 +1,4 @@
-% Milestone 1 Matt Gray 101183570 ELEC 4700 Project 
+% Milestone 2 Matt Gray 101183570 ELEC 4700 Project 
 
 %Default setup for plotting
 set(0,'defaultaxesfontsize', 20)
@@ -165,13 +165,28 @@ end
 fftOutput = fftshift(fft(OutputR));
 omega =  fftshift(wspace(time));
 
-figure('Name', 'Bode Plot')
-subplot(2,1,1);
-plot(omega, abs(fftOutput), title('Magnitude Plot'));
+figure('Name', 'Frequency Domain Analysis')
 
-subplot(2,1,2);
-plot(omega, angle(fftOutput), title('Phase Plot'));
+subplot(3,1,1)
+plot(omega, abs(fftOutput), 'r')
+xlabel('Frequency (rad/s)')
+ylabel('Magnitude')
+title('Mag Spectrum')
+grid on
+
+subplot(3,1,2)
+plot(omega, unwrap(angle(fftOutput)), 'b')
+xlabel('Frequency (rad/s)')
+ylabel('Phase(Rads)')
+title('Phase Spectrum')
+grid on
 
 
-
+subplot(3,1,3)
+plot(omega, real(fftOutput), 'g', omega, imag(fftOutput), 'm')
+xlabel('Frequency (rad/s)')
+ylabel('Amplitude')
+title('Real and Imaj parts FFTOUTPUT')
+legend('Real', 'Imaj')
+grid on
 
