@@ -22,7 +22,7 @@ beta_i = 8; % Imaginary Beta Value Milestone 2 Imj component adds gain to the wa
 
 %Input parameters for L and R constants
 InputParasL.E0 = 1e5; %Adjusts the amplitude of the wave
-InputParasL.we = 50000000000000; %Milestone 2: Modulates the waveform **Remember in PicoSecond Scale
+InputParasL.we = 0; %Milestone 2: Modulates the waveform **Remember in PicoSecond Scale Needs to be like e13 to modulate
 InputParasL.t0 = 2e-12; % inital time of the wave
 InputParasL.wg = 5e-13; %pusle width
 InputParasL.phi = 0;
