@@ -1,4 +1,4 @@
-% Milestone 2 Matt Gray 101183570 ELEC 4700 Project 
+% Milestone 3 Matt Gray 101183570 ELEC 4700 Project 
 
 %Default setup for plotting
 set(0,'defaultaxesfontsize', 20)
@@ -16,9 +16,18 @@ c_mu_0 = 1/c_eps_0/c_c^2; % uo
 c_q = 1.60217653e-19; % electron charge
 c_hb = 1.05457266913e-34; %plancks constant
 c_h = c_hb*2*pi; %reduced plancks constant
+kappa0 = 100; % Milestone3 --> Kappa constant imaginary part of effective refractive index
+kappaStart = 1/3;
+kappaStop = 2/3;
 
-beta_r = 80; % Real Beta value Milestone 2 Real component adds a "Twist"
-beta_i = 8; % Imaginary Beta Value Milestone 2 Imj component adds gain to the waveform
+kf = 0; %Milestone 3 -->kappa fwd,do not require rev cause we assume they are equal
+
+beta_r = 0; % Real Beta value Milestone 2 Real component adds a "Twist"
+beta_i = 0; % Imaginary Beta Value Milestone 2 Imj component adds gain to the waveform
+
+kappa = kappa0 * ones(size(z));%Milestone 3 --> initalizing kappa
+kappa(z<L * kappaStart) = 0;% Milestone 3 --> establishing grating boundaries
+kappa(z>L * kappaStop) = 0;
 
 %Input parameters for L and R constants
 InputParasL.E0 = 1e5; %Adjusts the amplitude of the wave
@@ -116,7 +125,7 @@ for i = 2:Nt
     exp_det = exp(-1i * dz * beta); %Milestone 2 Exponent
 
     Ef(2:Nz) = fsync * exp_det(1:Nz-1) .* Ef(1:Nz-1); % Edited Milestone 2
-    Er(1:Nz-1) = fsync * exp_det(2:Nz) .* Er(2:Nz); % Edited Milestone 2
+    Er(1:Nz-1) = fsync * exp_det(2:Nz) + 1i*dz*kappa(2:Nz) .* Er(2:Nz); % Edited Milestone 2 & 3
 
   
 
@@ -190,3 +199,8 @@ title('Real and Imaj parts FFTOUTPUT')
 legend('Real', 'Imaj')
 grid on
 
+figure('Name', 'Kappa vs Z')
+plot(z, kappa, 'p')
+xlabel('z')
+ylabel('Kappa')
+grid on
