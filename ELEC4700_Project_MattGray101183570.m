@@ -23,6 +23,8 @@ g_fwhm = 3.53e+012/10; % Milestone 4
 LGamma = g_fwhm * 2 * pi; % Milestone 4
 Lw0 = 0.0;
 LGain = 0.1;
+L =  1000e-6 * 1e2; %Len of sim
+
 
 kf = 0; %Milestone 3 -->kappa fwd,do not require rev cause we assume they are equal
 
@@ -51,7 +53,6 @@ RR = 0.9i;
 
 plotN = 10; % frequency of plotting
 
-L =  1000e-6 * 1e2; %Len of sim
 XL = [0, L]; % X and Y Axis limits
 YL = [0, InputParasL.E0];
 
