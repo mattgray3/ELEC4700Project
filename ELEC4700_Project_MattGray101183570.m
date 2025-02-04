@@ -1,4 +1,4 @@
-% Milestone 3 Matt Gray 101183570 ELEC 4700 Project 
+% Milestone 4 Matt Gray 101183570 ELEC 4700 Project 
 
 %Default setup for plotting
 set(0,'defaultaxesfontsize', 20)
@@ -19,6 +19,10 @@ c_h = c_hb*2*pi; %reduced plancks constant
 kappa0 = 100; % Milestone3 --> Kappa constant imaginary part of effective refractive index
 kappaStart = 1/3;
 kappaStop = 2/3;
+g_fwhm = 3.53e+012/10; % Milestone 4
+LGamma = g_fwhm * 2 * pi; % Milestone 4
+Lw0 = 0.0;
+LGain = 0.1;
 
 kf = 0; %Milestone 3 -->kappa fwd,do not require rev cause we assume they are equal
 
@@ -70,6 +74,15 @@ OutputR = nan(1, Nt);
 
 Ef = zeros(size(z)); % Electric field forward
 Er = zeros(size(z));% Electric field Reflected
+
+Pf = zeros(size(z)); %Milestone4
+Pr = zeros(size(z)); %Milestone4
+
+Efp = Ef;
+Erp = Er;
+Pfp = Pf;
+Prp = Pr;
+
 
 Ef1 = @SourceFct; % Generates source for electric field
 ErN = @SourceFct;
@@ -124,10 +137,28 @@ for i = 2:Nt
     beta = ones(size(z)) * (beta_r + 1i * beta_i); %Milestone 2 Beta Equation
     exp_det = exp(-1i * dz * beta); %Milestone 2 Exponent
 
-    Ef(2:Nz) = fsync * exp_det(1:Nz-1) .* Ef(1:Nz-1); % Edited Milestone 2
-    Er(1:Nz-1) = fsync * exp_det(2:Nz) + 1i*dz*kappa(2:Nz) .* Er(2:Nz); % Edited Milestone 2 & 3
+    Pf(1) = 0;
+    Pf(Nz) = 0;
+    Pr(1) = 0;
+    Pr(Nz) = 0;
+    Cw0 = -LGamma + 1i*Lw0;
+
+    Tf = LGamma*Ef(1:Nz-2) + Cw0*Pfp(2:Nz-1) + LGamma*Efp(1:Nz-2);
+    Pf(2:Nz-1) =(Pfp(2:Nz-1) + 0.5*dt*Tf)./(1-0.5*dt*Cw0);
+    Tr = LGamma*Er(3:Nz) + Cw0*Prp(2:Nz-1) + LGamma*Erp(3:Nz);
+    Pr(2:Nz-1) = (Prp(2:Nz-1) + 0.5*dt*Tr)./(1-0.5*dt*Cw0);
+
+    Ef(2:Nz-1) = Ef(2:Nz-1) - LGain*(Ef(2:Nz-1)-Pf(2:Nz-1)); 
+    Er(2:Nz-1) = Er(2:Nz-1) - LGain*(Er(2:Nz-1)-Pr(2:Nz-1));
+
+    %Ef(2:Nz) = fsync * exp_det(1:Nz-1) .* Ef(1:Nz-1); % Edited Milestone 2 & 4
+    %Er(1:Nz-1) = fsync * exp_det(2:Nz) + 1i*dz*kappa(2:Nz) .* Er(2:Nz); % Edited Milestone 2 & 3 &4
 
   
+    Efp = Ef;
+    Erp = Er;
+    Pfp = Pr;
+    Prp = Pr;
 
     OutputR(i) = Ef(Nz)*(1-RR);
     OutputL(i) =  Er(1)*(1-RL);
@@ -168,6 +199,8 @@ for i = 2:Nt
             'Location','east')
         hold off
         pause(0.01)
+
+      
     end
 end
 
