@@ -31,9 +31,6 @@ kf = 0; %Milestone 3 -->kappa fwd,do not require rev cause we assume they are eq
 beta_r = 0; % Real Beta value Milestone 2 Real component adds a "Twist"
 beta_i = 0; % Imaginary Beta Value Milestone 2 Imj component adds gain to the waveform
 
-kappa = kappa0 * ones(size(z));%Milestone 3 --> initalizing kappa
-kappa(z<L * kappaStart) = 0;% Milestone 3 --> establishing grating boundaries
-kappa(z>L * kappaStop) = 0;
 
 %Input parameters for L and R constants
 InputParasL.E0 = 1e5; %Adjusts the amplitude of the wave
@@ -73,6 +70,10 @@ InputR = nan(1, Nt);
 OutputL = nan(1, Nt);
 OutputR = nan(1, Nt);
 
+kappa = kappa0 * ones(size(z));%Milestone 3 --> initalizing kappa
+kappa(z<L * kappaStart) = 0;% Milestone 3 --> establishing grating boundaries
+kappa(z>L * kappaStop) = 0;
+
 Ef = zeros(size(z)); % Electric field forward
 Er = zeros(size(z));% Electric field Reflected
 
@@ -100,6 +101,10 @@ OutputL(1) = Er(1);
 
 Ef(1) = InputL(1);
 Er(Nz) = InputR(1);
+
+beta = ones(size(z)) * (beta_r + 1i * beta_i); %Milestone 2 Beta Equation
+exp_det = exp(-1i * dz * beta); %Milestone 2 Exponent
+
 
 % Setup For Simulation Figures
 figure('Name','Fields')
@@ -135,25 +140,22 @@ for i = 2:Nt
     Ef(1) = InputL(i) + RL*Er(1);
     Er(Nz) = InputR(i) + RR*Ef(Nz);
 
-    beta = ones(size(z)) * (beta_r + 1i * beta_i); %Milestone 2 Beta Equation
-    exp_det = exp(-1i * dz * beta); %Milestone 2 Exponent
-
     Pf(1) = 0;
     Pf(Nz) = 0;
     Pr(1) = 0;
     Pr(Nz) = 0;
     Cw0 = -LGamma + 1i*Lw0;
 
-    Tf = LGamma*Ef(1:Nz-2) + Cw0*Pfp(2:Nz-1) + LGamma*Efp(1:Nz-2);
-    Pf(2:Nz-1) =(Pfp(2:Nz-1) + 0.5*dt*Tf)./(1-0.5*dt*Cw0);
-    Tr = LGamma*Er(3:Nz) + Cw0*Prp(2:Nz-1) + LGamma*Erp(3:Nz);
-    Pr(2:Nz-1) = (Prp(2:Nz-1) + 0.5*dt*Tr)./(1-0.5*dt*Cw0);
+    Tf = LGamma * Ef(1:Nz-2) + Cw0 * Pfp(2:Nz-1) + LGamma * Efp(1:Nz-2);
+    Pf(2:Nz-1) = (Pfp(2:Nz-1) + 0.5 * dt * Tf) ./ (1 - 0.5 * dt * Cw0);
+    Tr = LGamma * Er(3:Nz) + Cw0 * Prp(2:Nz-1) + LGamma * Erp(3:Nz);
+    Pr(2:Nz-1) = (Prp(2:Nz-1) + 0.5 * dt * Tr) ./ (1 - 0.5 * dt * Cw0);
 
-    Ef(2:Nz-1) = Ef(2:Nz-1) - LGain*(Ef(2:Nz-1)-Pf(2:Nz-1)); 
-    Er(2:Nz-1) = Er(2:Nz-1) - LGain*(Er(2:Nz-1)-Pr(2:Nz-1));
+    Ef(2:Nz-1) = Ef(2:Nz-1) - LGain*(Ef(2:Nz-1) - Pf(2:Nz-1));
+    Er(2:Nz-1) = Er(2:Nz-1) - LGain*(Er(2:Nz-1) - Pr(2:Nz-1));
 
-    %Ef(2:Nz) = fsync * exp_det(1:Nz-1) .* Ef(1:Nz-1); % Edited Milestone 2 & 4
-    %Er(1:Nz-1) = fsync * exp_det(2:Nz) + 1i*dz*kappa(2:Nz) .* Er(2:Nz); % Edited Milestone 2 & 3 &4
+    Ef(2:Nz) = fsync * exp_det(1:Nz-1) .* Ef(1:Nz-1); % Edited Milestone 2 & 4
+    Er(1:Nz-1) = fsync * exp_det(2:Nz) + 1i*dz*kappa(2:Nz) .* Er(2:Nz); % Edited Milestone 2 & 3 &4
 
   
     Efp = Ef;
