@@ -22,7 +22,7 @@ kappaStop = 2/3;
 g_fwhm = 3.53e+012/10; % Milestone 4
 LGamma = g_fwhm * 2 * pi; % Milestone 4
 Lw0 = 0.0;
-LGain = 0.1;
+LGain = 0.001;
 L =  1000e-6 * 1e2; %Len of sim
 
 
@@ -70,7 +70,7 @@ InputR = nan(1, Nt);
 OutputL = nan(1, Nt);
 OutputR = nan(1, Nt);
 
-kappa = kappa0 * ones(size(z));%Milestone 3 --> initalizing kappa
+kappa = 0*kappa0 * ones(size(z));%Milestone 3 --> initalizing kappa
 kappa(z<L * kappaStart) = 0;% Milestone 3 --> establishing grating boundaries
 kappa(z>L * kappaStop) = 0;
 
@@ -139,6 +139,10 @@ for i = 2:Nt
 
     Ef(1) = InputL(i) + RL*Er(1);
     Er(Nz) = InputR(i) + RR*Ef(Nz);
+        
+    Ef(2:Nz) = fsync * exp_det(1:Nz-1) .* Ef(1:Nz-1) + 1i*dz*kappa(1:Nz-1) .* Er(1:Nz-1); % Edited Milestone 2
+    Er(1:Nz-1) = fsync * exp_det(2:Nz).* Er(2:Nz) + 1i*dz*kappa(2:Nz) .* Ef(2:Nz); % Edited Milestone 2 & 3  
+
 
     Pf(1) = 0;
     Pf(Nz) = 0;
@@ -154,10 +158,6 @@ for i = 2:Nt
     Ef(2:Nz-1) = Ef(2:Nz-1) - LGain*(Ef(2:Nz-1) - Pf(2:Nz-1));
     Er(2:Nz-1) = Er(2:Nz-1) - LGain*(Er(2:Nz-1) - Pr(2:Nz-1));
 
-    Ef(2:Nz) = fsync * exp_det(1:Nz-1) .* Ef(1:Nz-1); % Edited Milestone 2 & 4
-    Er(1:Nz-1) = fsync * exp_det(2:Nz) + 1i*dz*kappa(2:Nz) .* Er(2:Nz); % Edited Milestone 2 & 3 &4
-
-  
     Efp = Ef;
     Erp = Er;
     Pfp = Pr;
@@ -208,35 +208,51 @@ for i = 2:Nt
 end
 
 fftOutput = fftshift(fft(OutputR));
+fftInput = fftshift(fft(OutputL));
 omega =  fftshift(wspace(time));
 
-figure('Name', 'Frequency Domain Analysis')
+figure('Name', 'Frequency Domain Analysis MAG')
 
 subplot(3,1,1)
 plot(omega, abs(fftOutput), 'r')
 xlabel('Frequency (rad/s)')
 ylabel('Magnitude')
-title('Mag Spectrum')
+title('Mag Spectrum OUT')
 grid on
 
 subplot(3,1,2)
-plot(omega, unwrap(angle(fftOutput)), 'b')
+plot(omega, abs(fftInput), 'b')
+xlabel('Frequency (rad/s)')
+ylabel('Magnitude')
+title('Mag Spectrum IN')
+grid on
+
+figure('Name', 'Frequency Domain Analysis Phase')
+
+subplot(3,1,1)
+plot(omega, unwrap(angle(fftOutput)), 'r')
 xlabel('Frequency (rad/s)')
 ylabel('Phase(Rads)')
-title('Phase Spectrum')
+title('Phase Spectrum OUT')
 grid on
 
-
-subplot(3,1,3)
-plot(omega, real(fftOutput), 'g', omega, imag(fftOutput), 'm')
+subplot(3,1,2)
+plot(omega, unwrap(angle(fftInput)), 'b')
 xlabel('Frequency (rad/s)')
-ylabel('Amplitude')
-title('Real and Imaj parts FFTOUTPUT')
-legend('Real', 'Imaj')
+ylabel('Phase(Rads)')
+title('Phase Spectrum IN')
 grid on
 
-figure('Name', 'Kappa vs Z')
-plot(z, kappa, 'p')
-xlabel('z')
-ylabel('Kappa')
-grid on
+%subplot(3,1,3)
+%plot(omega, real(fftOutput), 'g', omega, imag(fftOutput), 'm')
+%xlabel('Frequency (rad/s)')
+%ylabel('Amplitude')
+%title('Real and Imaj parts FFTOUTPUT')
+%legend('Real', 'Imaj')
+%grid on
+
+%figure('Name', 'Kappa vs Z')
+%plot(z, kappa, 'p')
+%xlabel('z')
+%ylabel('Kappa')
+%grid on
