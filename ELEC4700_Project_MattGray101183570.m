@@ -124,8 +124,8 @@ for i = 2:Nt
     beta = ones(size(z)) * (beta_r + 1i * beta_i); %Milestone 2 Beta Equation
     exp_det = exp(-1i * dz * beta); %Milestone 2 Exponent
 
-    Ef(2:Nz) = fsync * exp_det(1:Nz-1) .* Ef(1:Nz-1); % Edited Milestone 2
-    Er(1:Nz-1) = fsync * exp_det(2:Nz) + 1i*dz*kappa(2:Nz) .* Er(2:Nz); % Edited Milestone 2 & 3
+    Ef(2:Nz) = fsync * exp_det(1:Nz-1) .* Ef(1:Nz-1) + 1i*dz*kappa(1:Nz-1) .* Er(1:Nz-1); % Edited Milestone 2
+    Er(1:Nz-1) = fsync * exp_det(2:Nz).* Er(2:Nz) + 1i*dz*kappa(1:Nz-1) .* Ef(2:Nz) ; % Edited Milestone 2 & 3  
 
   
 
@@ -172,9 +172,11 @@ for i = 2:Nt
 end
 
 fftOutput = fftshift(fft(OutputR));
+fftOutput2 = fftshift(fft(OutputL));
+fftInput = fftshift(fft(InputL));
 omega =  fftshift(wspace(time));
 
-figure('Name', 'Frequency Domain Analysis')
+figure('Name', 'Frequency Domain Analysis OUTPUT R')
 
 subplot(3,1,1)
 plot(omega, abs(fftOutput), 'r')
@@ -195,7 +197,57 @@ subplot(3,1,3)
 plot(omega, real(fftOutput), 'g', omega, imag(fftOutput), 'm')
 xlabel('Frequency (rad/s)')
 ylabel('Amplitude')
-title('Real and Imaj parts FFTOUTPUT')
+title('Real and Imaj parts FFTOUTPUT L')
+legend('Real', 'Imaj')
+grid on
+
+figure('Name', 'Frequency Domain Analysis OUTPUT L')
+
+subplot(3,1,1)
+plot(omega, abs(fftOutput2), 'r')
+xlabel('Frequency (rad/s)')
+ylabel('Magnitude')
+title('Mag Spectrum')
+grid on
+
+subplot(3,1,2)
+plot(omega, unwrap(angle(fftOutput2)), 'b')
+xlabel('Frequency (rad/s)')
+ylabel('Phase(Rads)')
+title('Phase Spectrum')
+grid on
+
+
+subplot(3,1,3)
+plot(omega, real(fftOutput), 'g', omega, imag(fftOutput2), 'm')
+xlabel('Frequency (rad/s)')
+ylabel('Amplitude')
+title('Real and Imaj parts FFTOUTPUT L')
+legend('Real', 'Imaj')
+grid on
+
+figure('Name', 'Frequency Domain Analysis INPUT L')
+
+subplot(3,1,1)
+plot(omega, abs(fftInput), 'r')
+xlabel('Frequency (rad/s)')
+ylabel('Magnitude')
+title('Mag Spectrum')
+grid on
+
+subplot(3,1,2)
+plot(omega, unwrap(angle(fftInput)), 'b')
+xlabel('Frequency (rad/s)')
+ylabel('Phase(Rads)')
+title('Phase Spectrum')
+grid on
+
+
+subplot(3,1,3)
+plot(omega, real(fftOutput), 'g', omega, imag(fftInput), 'm')
+xlabel('Frequency (rad/s)')
+ylabel('Amplitude')
+title('Real and Imaj parts FFTINPUTL')
 legend('Real', 'Imaj')
 grid on
 
