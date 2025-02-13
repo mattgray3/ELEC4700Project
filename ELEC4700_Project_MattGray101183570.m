@@ -16,13 +16,13 @@ c_mu_0 = 1/c_eps_0/c_c^2; % uo
 c_q = 1.60217653e-19; % electron charge
 c_hb = 1.05457266913e-34; %plancks constant
 c_h = c_hb*2*pi; %reduced plancks constant
-kappa0 = 100; % Milestone3 --> Kappa constant imaginary part of effective refractive index
+kappa0 = 0*100; % Milestone3 --> Kappa constant imaginary part of effective refractive index
 kappaStart = 1/3;
 kappaStop = 2/3;
 
 
 %Input parameters for L and R constants
-InputParasL.E0 = 1e5; %Adjusts the amplitude of the wave
+InputParasL.E0 = 10e6; %Adjusts the amplitude of the wave
 InputParasL.we = 0; %Milestone 2: Modulates the waveform **Remember in PicoSecond Scale Needs to be like e13 to modulate
 InputParasL.t0 = 2e-12; % inital time of the wave
 InputParasL.wg = 5e-13; %pusle width
@@ -63,7 +63,7 @@ OutputR = nan(1, Nt);
 g_fwhm = 3.53e+012/10; % Milestone 4
 LGamma = g_fwhm * 2 * pi; % Milestone 4
 Lw0 = 0.0; %Milestone 4
-LGain = 0.001; %Milestone 4
+LGain = 0.01; %Milestone 4
 
 kf = 0; %Milestone 3 -->kappa fwd,do not require rev cause we assume they are equal
 
