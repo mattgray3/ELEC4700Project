@@ -18,12 +18,21 @@ c_hb = 1.05457266913e-34; %plancks constant
 c_h = c_hb*2*pi; %reduced plancks constant
 
 %Input parameters for L and R constants
-InputParasL.E0 = 1e5; %Adjusts the amplitude of the wave
-InputParasL.we = 0;
-InputParasL.t0 = 2e-12; % inital time of the wave
-InputParasL.wg = 5e-13; %pusle width
-InputParasL.phi = 0;
-InputParasR = 0; % right source equal to zero since only reflections come from right side
+%InputParasL.E0 = 1e5; %Adjusts the amplitude of the wave
+%InputParasL.we = 0;
+%InputParasL.t0 = 2e-12; % inital time of the wave
+%InputParasL.wg = 5e-13; %pusle width
+%InputParasL.phi = 0;
+%InputParasR = 0; % right source equal to zero since only reflections come from right side
+
+InputParasR = struct(); 
+InputParasR.E0 = 1e5; % Adjust the amplitude
+InputParasR.we = 0;
+InputParasR.t0 = 2e-12; % Initial time
+InputParasR.wg = 5e-13; % Pulse width
+InputParasR.phi = 0;
+InputParasL = 0;
+
 
 %Material and Simulation Parameters
 n_g = 3.5; % medium index
@@ -37,7 +46,8 @@ plotN = 10; % frequency of plotting
 
 L =  1000e-6 * 1e2; %Len of sim
 XL = [0, L]; % X and Y Axis limits
-YL = [0, InputParasL.E0];
+%YL = [0, InputParasL.E0]; % L Input
+YL = [0, InputParasR.E0]; % R Input
 
 Nz = 500; % # spatical grid pts
 dz = L / (Nz-1); % spacital step size
@@ -66,7 +76,10 @@ ErN = @SourceFct;
 t = 0; % initalizing time of simulation
 time(1) = t;
 
-InputL(1) = Ef1(t, InputParasL);
+%InputL(1) = Ef1(t, InputParasL); % Left Input
+%InputR(1) = ErN(t, 0);
+
+InputL(1) = Ef1(t, 0);  % Right Input
 InputR(1) = ErN(t, InputParasR);
 
 OutputR(1) = Ef(Nz);
@@ -102,8 +115,12 @@ for i = 2:Nt
     t = dt *(i-1);
     time(i) = t;
 
-    InputL(i) = Ef1(t, InputParasL);
+    InputL(i) = Ef1(t, InputParasL); % Left Input
     InputR(i) = ErN(t, 0);
+
+    InputL(i) = Ef1(t, 0);  % Right Input
+    InputR(i) = ErN(t, InputParasR); 
+
 
     Ef(1) = InputL(i) + RL*Er(1);
     Er(Nz) = InputR(i) + RR*Ef(Nz);
@@ -111,8 +128,11 @@ for i = 2:Nt
     Ef(2:Nz) = fsync * Ef(1:Nz-1);
     Er(1:Nz-1) = fsync * Er(2:Nz);
 
-    OutputR(i) = Ef(Nz)*(1-RR);
-    OutputL(i) =  Er(1)*(1-RL);
+    %OutputR(i) = Ef(Nz)*(1-RR); % L input R Output
+    %OutputL(i) =  Er(1)*(1-RL);
+
+    OutputL(i) = Er(1) * (1 - RL); % R input L Output
+    OutputR(i) = Ef(Nz) * (1 - RR);
 
     if mod(i, plotN) == 0
         subplot(3,1,1)
@@ -139,7 +159,7 @@ for i = 2:Nt
         plot(time*1e12, real(InputL), 'r'); hold on
         plot(time*1e12, real(OutputR), 'g');
         plot(time*1e12, real(InputR), 'b');
-        plot(time*1e12, real(OutputL), 'w');
+        plot(time*1e12, real(OutputL), 'p');
 
         xlim([0, Nt*dt*1e12])
         ylim(YL)
