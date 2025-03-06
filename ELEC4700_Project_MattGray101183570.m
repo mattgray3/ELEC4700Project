@@ -1,4 +1,4 @@
-% Milestone 5 Matt Gray 101183570 ELEC 4700 Project 
+% Milestone 6 Matt Gray 101183570 ELEC 4700 Project 
 
 %Default setup for plotting
 set(0,'defaultaxesfontsize', 20)
@@ -16,17 +16,20 @@ c_mu_0 = 1/c_eps_0/c_c^2; % uo
 c_q = 1.60217653e-19; % electron charge
 c_hb = 1.05457266913e-34; %plancks constant
 c_h = c_hb*2*pi; %reduced plancks constant
-kappa0 = 1; % Milestone3 --> Kappa constant imaginary part of effective refractive index
+kappa0 = 0*100; % Milestone3 --> Kappa constant imaginary part of effective refractive index
 kappaStart = 1/3;
 kappaStop = 2/3;
 
 
 %Input parameters for L and R constants
+
 InputParasL.E0 = 10e6; %Adjusts the amplitude of the wave
 InputParasL.we = 0; %Milestone 2: Modulates the waveform **Remember in PicoSecond Scale Needs to be like e13 to modulate
 InputParasL.t0 = 2e-12; % inital time of the wave
 InputParasL.wg = 5e-13; %pusle width
 InputParasL.phi = 0;
+
+%InputParasL = 0;
 InputParasR = 0; % right source equal to zero since only reflections come from right side
 
 %Material and Simulation Parameters
@@ -37,18 +40,18 @@ Lambda = 1550e-9; %wavelength
 RL = 0.9i; % Reflectoin coefficients for L and R sides
 RR = 0.9i;
 
-plotN = 10; % frequency of plotting
+plotN = 10000; % frequency of plotting
 
-L =  1000e-6 * 1e2; %Len of sim
+L =  10e-6 * 1e2; %Len of sim
 XL = [0, L]; % X and Y Axis limits
 YL = [0, InputParasL.E0];
 
-Nz = 500; % # spatical grid pts
+Nz = 50; % # spatical grid pts
 dz = L / (Nz-1); % spacital step size
 dt =  dz/vg; % Time step size
 fsync = dt * vg /dz; % sync factor
 
-Nt =  floor(2*Nz); % total # of time steps
+Nt =  15000*floor(2*Nz); % total # of time steps
 tmax = Nt * dt; % Max sim time
 t_L = dt * Nz;
 
@@ -63,18 +66,16 @@ OutputR = nan(1, Nt);
 g_fwhm = 3.53e+012/10; % Milestone 4
 LGamma = g_fwhm * 2 * pi; % Milestone 4
 Lw0 = 0.0; %Milestone 4
-LGain = 0.0; %Milestone 4
+LGain = 0; %Milestone 4
 
 kf = 0; %Milestone 3 -->kappa fwd,do not require rev cause we assume they are equal
 
 beta_r = 0; % Real Beta value Milestone 2 Real component adds a "Twist"
 beta_i = 0; % Imaginary Beta Value Milestone 2 Imj component adds gain to the waveform
 
-%{
 kappa = kappa0 * ones(size(z));%Milestone 3 --> initalizing kappa
 kappa(z<L * kappaStart) = 0;% Milestone 3 --> establishing grating boundaries
 kappa(z>L * kappaStop) = 0;
-%}
 
 Ef = zeros(size(z)); % Electric field forward
 Er = zeros(size(z));% Electric field Reflected
@@ -90,29 +91,6 @@ Prp = Pr; %Milestone 4
 Ef1 = @SourceFct; % Generates source for electric field
 ErN = @SourceFct;
 
-% Define bit sequence for grating
-%bitSequence = [1 0 1 0 1 0 1 0]; %Defined 8 Bit sequence
-
-bitSequence = randi([0, 1], 1, 8); %Random 8 Bit sequence
-disp(['Random 8-bit sequence: ', num2str(bitSequence)]);
-
-numBits = length(bitSequence);
-gratingStart = L * kappaStart;
-gratingStop  = L * kappaStop;
-L_grating = gratingStop - gratingStart;
-kappa = zeros(size(z)) ;% * kappa0;
-
-% Create structured grating based on bit sequence
-bitWidth = L_grating / numBits;
-for i = 1:numBits
-    segStart = gratingStart + (i-1) * bitWidth;
-    segEnd   = segStart + bitWidth;
-    idx = find(z >= segStart & z < segEnd);
-    if bitSequence(i) == 1
-        kappa(idx) = kappa0;
-    end
-end
-
 %Time Loop
 t = 0; % initalizing time of simulation
 time(1) = t;
@@ -126,28 +104,27 @@ OutputL(1) = Er(1);
 Ef(1) = InputL(1);
 Er(Nz) = InputR(1);
 
-% Setup For Simulation Figures
-figure('Name','Fields')
-subplot(3,1,1)
-plot(z*1000, real(Ef), 'r');
-hold off
-xlabel('z(\mum')
-ylabel('E_f')
-subplot(3,1,2)
-plot(z*1000, real(Er), 'b');
-xlabel('z(\mum)')
-ylabel('E_f')
-hold off
-subplot (3,1,3)
-plot(time * 1e2, real(InputL), 'r'); hold on
-plot(time * 1e2, real(OutputR), 'r--'); 
-plot(time * 1e2, real(InputR), 'b'); hold on
-plot(time * 1e2, real(OutputR), 'b--'); 
-xlabel('time(ps)')
-ylabel('E')
 
+%Milestone 6
 
-hold off
+Ntr = 1e18;
+gain = vg * 5e-16; 
+eVol = (1.5e-10) * c_q; 
+Ion = 0.25e-9; 
+Ioff = 3e-9; 
+I_off = 0.024; 
+I_on = 0.1;
+taun = 1e-9; 
+f0 = c_c/Lambda;
+
+Zg = sqrt(c_mu_0 / c_eps_0) / n_g; 
+EtoP = 1 / (Zg * f0 * vg * 1e-2 * c_hb); 
+alpha = 0;
+
+N = ones(size(z)) * Ntr;
+Nave = nan(1,Nt);
+Nave(1) = mean(N);
+
 
 %Main Time Stepping Loop iterativle increases time, soures and outputs
 for i = 2:Nt
@@ -190,59 +167,65 @@ for i = 2:Nt
     OutputR(i) = Ef(Nz)*(1-RR);
     OutputL(i) =  Er(1)*(1-RL);
 
+
+    % Milestone 6
+    S = (abs(Ef).^2 + abs(Er).^2) .* EtoP * 1e-6;
+
+    if t < Ion || t > Ioff
+        I_injv = I_off;
+    else
+        I_injv = I_on;
+    end
+    
+ 
+    Stim = gain .* (N - Ntr) .* S;
+
+    N = (N + dt * (I_injv / eVol - Stim)) ./ (1 + dt / taun);
+    
+    Nave(i) = mean(N);
+
     if mod(i, plotN) == 0
+        figure(2);
+  
         subplot(3,1,1)
-        plot(z*10000, real(Ef), 'r'); hold on 
-        plot(z*10000, imag(Ef), 'r--'); hold off
-        xlim(XL*1e4)
-        ylim(YL)
-        xlabel('z(\mum)')
-        ylabel('E_f')
-        legend('\Re', '\Im')
-        hold off
-
+        plot(z * 1e4, real(Ef), 'r'); hold on
+        plot(z * 1e4, imag(Ef), 'r--'); hold off
+        xlabel('z (\mum)');
+        ylabel('E_f');
+        %xlim([0,1000e-6]);
+        ylim([0,10e8]);
+        title('Forward Electric Field');
+    
         subplot(3,1,2)
-        plot(z*10000, real(Er), 'b'); hold on 
-        plot(z*10000, imag(Er), 'b--'); hold off
-        xlim(XL*1e4)
-        ylim(YL)
-        xlabel('z(\mum)')
-        ylabel('E_r')
-        legend('\Re', '\Im')
-        hold off
-
+        plot(z * 1e4, N, 'g');
+        xlabel('z (\mum)');
+        ylabel('N');
+        xlim([0,1000e-6]);
+        ylim([0,5e18]);
+        title('Carrier Density');
+    
         subplot(3,1,3)
-        plot(time*1e12, real(InputL), 'r'); hold on
-        plot(time*1e12, real(OutputR), 'g');
-        plot(time*1e12, real(InputR), 'b');
-        plot(time*1e12, real(OutputL), 'w');
-
-        xlim([0, Nt*dt*1e12])
-        ylim(YL)
-
-        xlabel('time(ps)')
-        ylabel('0')
-        legend('Left Input', 'Right Output', 'Right Input', 'Left Output', ...
-            'Location','east')
-        hold off
-        pause(0.01)
+        plot(time * 1e12, Nave, 'b');
+        xlabel('Time (ps)');
+        ylabel('Nave');
+        %xlim([0,5000e-12]);
+        ylim([0,5e18]);
+        title('Carrier Density Over Time');
+    
+        drawnow;
     end
 end
 
+
+
+%{
 fftOutput = fftshift(fft(OutputR));
 fftOutput2 = fftshift(fft(OutputL));
 fftInput = fftshift(fft(InputL));
 omega =  fftshift(wspace(time));
 
-% Plot the grating profile
-figure('Name', 'Grating Profile');
-plot(z, kappa, 'k', 'LineWidth', 2);
-xlabel('z (cm)');
-ylabel('\kappa (Grating Strength)');
-title('Bit-Coded Structured Grating');
-grid on;
 
-%{
+
 figure('Name', 'Frequency Domain Analysis MAG')
 
 plot(omega, 20*log10(abs(fftOutput)), 'r', omega, 20*log10(abs(fftInput)), 'b')
@@ -251,16 +234,14 @@ ylabel('Magnitude')
 title('Mag Spectrum, R = Out, B = In')
 grid on
 
-
-subplot(3,1,2)
-plot(omega, abs(fftInput), 'b')
-xlabel('Frequency (rad/s)')
-ylabel('Magnitude')
-title('Mag Spectrum IN')
-grid on
+%subplot(3,1,2)
+%plot(omega, abs(fftInput), 'b')
+%xlabel('Frequency (rad/s)')
+%ylabel('Magnitude')
+%title('Mag Spectrum IN')
+%grid on
 
 figure('Name', 'Frequency Domain Analysis Phase')
-
 
 plot(omega, unwrap(angle(fftOutput)), 'r', omega, unwrap(angle(fftInput)), 'b' )
 xlabel('Frequency (rad/s)')
@@ -268,25 +249,24 @@ ylabel('Phase(Rads)')
 title('Phase Spectrum, R = Out, B = In')
 grid on
 
+%subplot(3,1,2)
+%plot(omega, unwrap(angle(fftInput)), 'b')
+%xlabel('Frequency (rad/s)')
+%ylabel('Phase(Rads)')
+%title('Phase Spectrum IN')
+%grid on
 
-subplot(3,1,2)
-plot(omega, unwrap(angle(fftInput)), 'b')
-xlabel('Frequency (rad/s)')
-ylabel('Phase(Rads)')
-title('Phase Spectrum IN')
-grid on
+%subplot(3,1,3)
+%plot(omega, real(fftOutput), 'g', omega, imag(fftOutput), 'm')
+%xlabel('Frequency (rad/s)')
+%ylabel('Amplitude')
+%title('Real and Imaj parts FFTOUTPUT')
+%legend('Real', 'Imaj')
+%grid on
 
-subplot(3,1,3)
-plot(omega, real(fftOutput), 'g', omega, imag(fftOutput), 'm')
-xlabel('Frequency (rad/s)')
-ylabel('Amplitude')
-title('Real and Imaj parts FFTOUTPUT')
-legend('Real', 'Imaj')
-grid on
+%figure('Name', 'Kappa vs Z')
+%plot(z, kappa, 'p')
+%xlabel('z')
+%ylabel('Kappa')
+%grid on
 %}
-
-figure('Name', 'Kappa vs Z')
-plot(z, kappa, 'k', 'LineWidth', 2)
-xlabel('z')
-ylabel('Kappa')
-grid on
