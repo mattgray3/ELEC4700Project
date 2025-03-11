@@ -22,11 +22,14 @@ kappaStop = 2/3;
 
 
 %Input parameters for L and R constants
+
 InputParasL.E0 = 10e6; %Adjusts the amplitude of the wave
 InputParasL.we = 0; %Milestone 2: Modulates the waveform **Remember in PicoSecond Scale Needs to be like e13 to modulate
 InputParasL.t0 = 2e-12; % inital time of the wave
 InputParasL.wg = 5e-13; %pusle width
 InputParasL.phi = 0;
+
+%InputParasL = 0;
 InputParasR = 0; % right source equal to zero since only reflections come from right side
 
 %Material and Simulation Parameters
@@ -37,18 +40,18 @@ Lambda = 1550e-9; %wavelength
 RL = 0.9i; % Reflectoin coefficients for L and R sides
 RR = 0.9i;
 
-plotN = 10; % frequency of plotting
+plotN = 10000; % frequency of plotting
 
-L =  1000e-12 * 1e2; %Len of sim
+L =  10e-6 * 1e2; %Len of sim
 XL = [0, L]; % X and Y Axis limits
 YL = [0, InputParasL.E0];
 
-Nz = 500; % # spatical grid pts
+Nz = 50; % # spatical grid pts
 dz = L / (Nz-1); % spacital step size
 dt =  dz/vg; % Time step size
 fsync = dt * vg /dz; % sync factor
 
-Nt =  floor(2*Nz); % total # of time steps
+Nt =  15000*floor(2*Nz); % total # of time steps
 tmax = Nt * dt; % Max sim time
 t_L = dt * Nz;
 
@@ -103,21 +106,25 @@ Er(Nz) = InputR(1);
 
 
 %Milestone 6
+
 Ntr = 1e18;
-gain = vg * 2.5e-16; 
-eVol = 1.5e-10 * c_q; 
+gain = vg * 5e-16; 
+eVol = (1.5e-10) * c_q; 
 Ion = 0.25e-9; 
 Ioff = 3e-9; 
-I_off = 0.5; 
-I_on = 2;
+I_off = 0.024; 
+I_on = 0.1;
 taun = 1e-9; 
+f0 = c_c/Lambda;
 
 Zg = sqrt(c_mu_0 / c_eps_0) / n_g; 
 EtoP = 1 / (Zg * f0 * vg * 1e-2 * c_hb); 
 alpha = 0;
 
-N = ones(size(z)) * Ntr; % Ensure it starts at 1e18
+N = ones(size(z)) * Ntr;
+Nave = nan(1,Nt);
 Nave(1) = mean(N);
+
 
 %Main Time Stepping Loop iterativle increases time, soures and outputs
 for i = 2:Nt
@@ -162,7 +169,7 @@ for i = 2:Nt
 
 
     % Milestone 6
-    S = (abs(Ef).^2 + abs(Er).^2) * EtoP * 1e-6;
+    S = (abs(Ef).^2 + abs(Er).^2) .* EtoP * 1e-6;
 
     if t < Ion || t > Ioff
         I_injv = I_off;
@@ -180,23 +187,29 @@ for i = 2:Nt
     if mod(i, plotN) == 0
         figure(2);
   
-        subplot(4,1,1)
+        subplot(3,1,1)
         plot(z * 1e4, real(Ef), 'r'); hold on
         plot(z * 1e4, imag(Ef), 'r--'); hold off
         xlabel('z (\mum)');
         ylabel('E_f');
+        %xlim([0,1000e-6]);
+        ylim([0,10e8]);
         title('Forward Electric Field');
     
-        subplot(4,1,2)
+        subplot(3,1,2)
         plot(z * 1e4, N, 'g');
         xlabel('z (\mum)');
         ylabel('N');
+        xlim([0,1000e-6]);
+        ylim([0,5e18]);
         title('Carrier Density');
     
-        subplot(4,1,3)
-        plot(time(1:i) * 1e12, Nave(1:i), 'b');
+        subplot(3,1,3)
+        plot(time * 1e12, Nave, 'b');
         xlabel('Time (ps)');
         ylabel('Nave');
+        %xlim([0,5000e-12]);
+        ylim([0,5e18]);
         title('Carrier Density Over Time');
     
         drawnow;
