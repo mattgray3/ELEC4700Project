@@ -23,11 +23,12 @@ kappaStop = 2/3;
 
 %Input parameters for L and R constants
 
-InputParasL.E0 = 10e6; %Adjusts the amplitude of the wave
-InputParasL.we = 0; %Milestone 2: Modulates the waveform **Remember in PicoSecond Scale Needs to be like e13 to modulate
-InputParasL.t0 = 2e-12; % inital time of the wave
+InputParasL.E0 = 20e8; %Adjusts the amplitude of the wave
+InputParasL.we = 0; %2*pi*200e12; %Milestone 2: Modulates the waveform **Remember in PicoSecond Scale Needs to be like e13 to modulate
+InputParasL.t0 = 1e-12; % inital time of the wave
 InputParasL.wg = 5e-13; %pusle width
 InputParasL.phi = 0;
+InputParasL.rep = 1e-12;
 
 %InputParasL = 0;
 InputParasR = 0; % right source equal to zero since only reflections come from right side
@@ -110,8 +111,8 @@ Er(Nz) = InputR(1);
 Ntr = 1e18;
 gain = vg * 5e-16; 
 eVol = (1.5e-10) * c_q; 
-Ion = 0.25e-9; 
-Ioff = 3e-9; 
+Ion = 0.1e-9; 
+Ioff = 0.9e-9; 
 I_off = 0.024; 
 I_on = 0.1;
 taun = 1e-9; 
@@ -183,6 +184,7 @@ for i = 2:Nt
     N = (N + dt * (I_injv / eVol - Stim)) ./ (1 + dt / taun);
     
     Nave(i) = mean(N);
+    
 
     if mod(i, plotN) == 0
         figure(2);
