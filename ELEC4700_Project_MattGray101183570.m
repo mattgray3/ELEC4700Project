@@ -23,12 +23,12 @@ kappaStop = 2/3;
 
 %Input parameters for L and R constants
 
-InputParasL.E0 = 20e8; %Adjusts the amplitude of the wave
+InputParasL.E0 = 1e7; %Adjusts the amplitude of the wave
 InputParasL.we = 0; %2*pi*200e12; %Milestone 2: Modulates the waveform **Remember in PicoSecond Scale Needs to be like e13 to modulate
 InputParasL.t0 = 1e-12; % inital time of the wave
 InputParasL.wg = 5e-13; %pusle width
 InputParasL.phi = 0;
-InputParasL.rep = 2;
+InputParasL.rep = 500e-12;
 
 %InputParasL = 0;
 InputParasR = 0; % right source equal to zero since only reflections come from right side
@@ -38,12 +38,12 @@ n_g = 3.5; % medium index
 vg = c_c/n_g * 1e2; % medium velocity 
 Lambda = 1550e-9; %wavelength
 
-RL = 0.9i; % Reflectoin coefficients for L and R sides
-RR = 0.9i;
+RL = 0;%0.9i; % Reflectoin coefficients for L and R sides
+RR = 0;%0.9i;
 
-plotN = 1000; % frequency of plotting
+plotN = 500; % frequency of plotting
 
-L =  10e-6 * 1e2; %Len of sim
+L =  1000e-6 * 1e2; %Len of sim
 XL = [0, L]; % X and Y Axis limits
 YL = [0, InputParasL.E0];
 
@@ -52,7 +52,7 @@ dz = L / (Nz-1); % spacital step size
 dt =  dz/vg; % Time step size
 fsync = dt * vg /dz; % sync factor
 
-Nt = 1000 * floor(2*Nz); % total # of time steps
+Nt =  2500*floor(2*Nz); % total # of time steps
 tmax = Nt * dt; % Max sim time
 t_L = dt * Nz;
 
@@ -128,13 +128,11 @@ Nave(1) = mean(N);
 
 %Milestone 7
 gain_z = gain.*(N - Ntr)./vg;
-%beta_i = (gain_z - alpha)./2;
-
+beta_i = (gain_z - alpha)./2;
 
 beta_spe = .3e-5;
 gamma = 1.0;
 SPE = 0;%7;
-
 
 %Main Time Stepping Loop iterativle increases time, soures and outputs
 for i = 2:Nt
@@ -149,21 +147,10 @@ for i = 2:Nt
 
 
     beta_i = (gain_z - alpha)./2;%M7
-    gain_z = 1;%gain.*(N - Ntr)./vg;
+    gain_z = gain.*(N - Ntr)./vg;  %M7
+
     beta = ones(size(z)) .* (beta_r + 1i * beta_i); %Milestone 2 Beta Equation
-    exp_det = exp(-1i * dz * beta); %Milestone 2 Exponent
-
-    A = sqrt(gamma*beta_spe*c_hb*f0*L*1e-2/taun) / (2*Nz) ;%M&
-    if SPE > 0
-        Tf = (randn (Nz, 1) +1i*randn (Nz, 1) ) *A;
-        Tr = (randn (Nz, 1) +1i*randn (Nz, 1) ) *A;
-    else
-        Tf = (ones (Nz, 1))*A;
-        Tr = (ones (Nz, 1))*A;
-    end
-    EsF = Tf .* abs(SPE).* sqrt (N .*1e6) ;%M7
-    EsR = Tr .* abs(SPE) .* sqrt (N .*1e6);%M7
-
+    exp_det = exp(-1i .* dz * beta); %Milestone 2 Exponent
 
     Ef(2:Nz) = fsync * exp_det(1:Nz-1) .* Ef(1:Nz-1) + 1i*dz*kappa(1:Nz-1) .* Er(1:Nz-1); % Edited Milestone 2 & 3
     Er(1:Nz-1) = fsync * exp_det(2:Nz).* Er(2:Nz) + 1i*dz*kappa(1:Nz-1) .* Ef(2:Nz) ; % Edited Milestone 2 & 3
@@ -173,6 +160,20 @@ for i = 2:Nt
     Pr(1) = 0;
     Pr(Nz) = 0;
     Cw0 = -LGamma + 1i*Lw0;
+
+    A = sqrt(gamma*beta_spe*c_hb*f0*L*1e-2/taun) / (2*Nz) ;%M7
+    if SPE > 0
+        ETf = ((randn (Nz, 1) +1i*randn (Nz, 1) ) *A).';
+
+        ETr = ((randn (Nz, 1) +1i*randn (Nz, 1) ) *A).';
+    else
+        ETf = ((ones (Nz, 1))*A).';
+        
+        ETr = ((ones (Nz, 1))*A).';
+        
+    end
+    EsF = ETf .* abs(SPE).* sqrt (N .*1e6) ;%M7
+    EsR = ETr .* abs(SPE) .* sqrt (N .*1e6);%M7
 
     Tf = LGamma * Ef(1:Nz-2) + Cw0 * Pfp(2:Nz-1) + LGamma * Efp(1:Nz-2);
     Pf(2:Nz-1) = (Pfp(2:Nz-1) + 0.5 * dt * Tf) ./ (1 - 0.5 * dt * Cw0);
@@ -184,13 +185,11 @@ for i = 2:Nt
 
     Efp = Ef;
     Erp = Er;
-    Pfp = Pf;
+    Pfp = Pr;
     Prp = Pr;
 
-    Ef = Ef + EsF;
-    Er = Er + EsR;
-
-  
+    Ef = Ef + EsF; %M7
+    Er = Er + EsR;%M7
 
     OutputR(i) = Ef(Nz)*(1-RR);
     OutputL(i) =  Er(1)*(1-RL);
@@ -209,46 +208,61 @@ for i = 2:Nt
     Stim = gain .* (N - Ntr) .* S;
 
     N = (N + dt * (I_injv / eVol - Stim)) ./ (1 + dt / taun);
-        
-    Nave(i) = mean(N(2:Nz-1));
+    
+    Nave(i) = mean(N);
+    
 
     if mod(i, plotN) == 0
         figure(2);
   
-        subplot(3,1,1)
+        subplot(4,1,1)
         plot(z * 1e4, real(Ef), 'r'); hold on
         plot(z * 1e4, imag(Ef), 'r--'); hold off
         xlabel('z (\mum)');
         ylabel('E_f');
         %xlim([0,1000e-6]);
-        %ylim([0,10e8]);
+        ylim([0,10e6]);
         title('Forward Electric Field');
     
-        subplot(3,1,2)
+        subplot(4,1,2)
         plot(z * 1e4, N, 'g');
         xlabel('z (\mum)');
         ylabel('N');
-        %xlim([0,1000e-6]);
-        %ylim([0,5e18]);
+        xlim([0,1000e-6]);
+        ylim([0,5e18]);
         title('Carrier Density');
     
-        subplot(3,1,3)
+        subplot(4,1,3)
         plot(time * 1e12, Nave, 'b');
         xlabel('Time (ps)');
         ylabel('Nave');
         %xlim([0,5000e-12]);
-        %ylim([0,5e18]);
+        ylim([0,5e18]);
         title('Carrier Density Over Time');
+
+        subplot(4,1,4)
+        plot(time*1e12, real(InputL), 'r'); hold on
+        plot(time*1e12, real(OutputR), 'g');
+        plot(time*1e12, real(InputR), 'b');
+        plot(time*1e12, real(OutputL), 'w');
+
+        %xlim([0, Nt*dt*1e12])
+        ylim(YL)
+
+        xlabel('Time(ps)')
+        ylabel('0')
+        legend('Left Input', 'Right Output', 'Right Input', 'Left Output', ...
+            'Location','east')
+        hold off
+        pause(0.01)
     
         drawnow;
     end
-
-    
 end
 
 
 
-%{
+
 fftOutput = fftshift(fft(OutputR));
 fftOutput2 = fftshift(fft(OutputL));
 fftInput = fftshift(fft(InputL));
