@@ -23,12 +23,12 @@ kappaStop = 2/3;
 
 %Input parameters for L and R constants
 
-InputParasL.E0 = 20e8; %Adjusts the amplitude of the wave
+InputParasL.E0 = 1e7; %Adjusts the amplitude of the wave
 InputParasL.we = 0; %2*pi*200e12; %Milestone 2: Modulates the waveform **Remember in PicoSecond Scale Needs to be like e13 to modulate
 InputParasL.t0 = 1e-12; % inital time of the wave
 InputParasL.wg = 5e-13; %pusle width
 InputParasL.phi = 0;
-InputParasL.rep = 1e-12;
+InputParasL.rep = 500e-12;
 
 %InputParasL = 0;
 InputParasR = 0; % right source equal to zero since only reflections come from right side
@@ -38,21 +38,21 @@ n_g = 3.5; % medium index
 vg = c_c/n_g * 1e2; % medium velocity 
 Lambda = 1550e-9; %wavelength
 
-RL = 0.9i; % Reflectoin coefficients for L and R sides
-RR = 0.9i;
+RL = 0;%0.9i; % Reflectoin coefficients for L and R sides
+RR = 0;%0.9i;
 
-plotN = 10000; % frequency of plotting
+plotN = 500; % frequency of plotting
 
-L =  10e-6 * 1e2; %Len of sim
+L =  1000e-6 * 1e2; %Len of sim
 XL = [0, L]; % X and Y Axis limits
 YL = [0, InputParasL.E0];
 
-Nz = 50; % # spatical grid pts
+Nz = 500; % # spatical grid pts
 dz = L / (Nz-1); % spacital step size
 dt =  dz/vg; % Time step size
 fsync = dt * vg /dz; % sync factor
 
-Nt =  15000*floor(2*Nz); % total # of time steps
+Nt =  2500*floor(2*Nz); % total # of time steps
 tmax = Nt * dt; % Max sim time
 t_L = dt * Nz;
 
@@ -195,7 +195,7 @@ for i = 2:Nt
         xlabel('z (\mum)');
         ylabel('E_f');
         %xlim([0,1000e-6]);
-        ylim([0,10e8]);
+        ylim([0,10e6]);
         title('Forward Electric Field');
     
         subplot(3,1,2)
