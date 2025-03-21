@@ -38,8 +38,8 @@ n_g = 3.5; % medium index
 vg = c_c/n_g * 1e2; % medium velocity 
 Lambda = 1550e-9; %wavelength
 
-RL = 0.5;%0.9i; % Reflectoin coefficients for L and R sides
-RR = 0.5;%0.9i;
+RL = 0.5i;%0.9i; % Reflectoin coefficients for L and R sides
+RR = 0.5i;%0.9i;
 
 plotN = 500; % frequency of plotting
 
@@ -129,7 +129,7 @@ Nave(1) = mean(N);
 %M7
 beta_spe = .3e-5;
 gamma = 1.0;
-SPE = 7;%7;
+SPE = 7i;%7;
 
 
 %Main Time Stepping Loop iterativle increases time, soures and outputs
@@ -226,23 +226,23 @@ for i = 2:Nt
         plot(z * 1e4, imag(Ef), 'r--'); hold off
         xlabel('z (\mum)');
         ylabel('E_f');
-        %xlim([0,1000e-6]);
-        %ylim([0,10e6]);
+        xlim([0,1000e-6]);
+        ylim([0,10e6]);
         title('Forward Electric Field');
     
         subplot(4,1,2)
         plot(z * 1e4, N, 'g');
         xlabel('z (\mum)');
         ylabel('N');
-        %xlim([0,1000e-6]);
-        %ylim([0,4e18]);
+        xlim([0,1000e-6]);
+        ylim([0,4e18]);
         title('Carrier Density');
     
         subplot(4,1,3)
         plot(time * 1e12, Nave, 'b');
         xlabel('Time (ps)');
         ylabel('Nave');
-        %xlim([0,5000e-12]);
+        xlim([0,1000e-12]);
         ylim([0,5e18]);
         title('Carrier Density Over Time');
 
@@ -252,8 +252,8 @@ for i = 2:Nt
         plot(time*1e12, real(InputR), 'b');
         plot(time*1e12, real(OutputL), 'w');
 
-        %xlim([0, Nt*dt*1e12])
-        %ylim(YL)
+        xlim([0, Nt*dt*1e12]);
+        ylim([0,1000e-12]);
 
         xlabel('Time(ps)')
         ylabel('0')
