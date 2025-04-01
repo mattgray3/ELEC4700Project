@@ -1,4 +1,4 @@
-% Milestone 6 Matt Gray 101183570 ELEC 4700 Project 
+% Milestone 7 Matt Gray 101183570 ELEC 4700 Project 
 
 %Default setup for plotting
 set(0,'defaultaxesfontsize', 20)
