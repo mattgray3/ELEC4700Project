@@ -17,8 +17,8 @@ c_q = 1.60217653e-19; % electron charge
 c_hb = 1.05457266913e-34; %plancks constant
 c_h = c_hb*2*pi; %reduced plancks constant
 kappa0 = 0*100; % Milestone3 --> Kappa constant imaginary part of effective refractive index
-kappaStart = 1/3;
-kappaStop = 2/3;
+kappaStart = .49;
+kappaStop = .51;
 
 
 %Input parameters for L and R constants
@@ -71,7 +71,7 @@ LGain = 0.05; %Milestone 4
 
 kf = 0; %Milestone 3 -->kappa fwd,do not require rev cause we assume they are equal
 
-beta_r = 8e20; % Real Beta value Milestone 2 Real component adds a "Twist"
+beta_r = 0; % Real Beta value Milestone 2 Real component adds a "Twist"
 %beta_i = 0; % Imaginary Beta Value Milestone 2 Imj component adds gain to the waveform
 
 kappa = kappa0 * ones(size(z));%Milestone 3 --> initalizing kappa
@@ -279,10 +279,17 @@ omega =  fftshift(wspace(time));
 OutputRE = real(OutputR); %Milestone9
 OutputIM = imag(OutputR);
 
-eigs = eig(OutputR);
+N = floor(sqrt(length(OutputR))); % Find closest square size
+OutputR_SQ = reshape(OutputR(1:N^2), [N, N]);
 
-figure('Name','Plotting SS Eigenvalues')
-scatter(OutputR, "filled");
+eigs = eig(OutputR_SQ);
+
+figure('Name', 'Eigenvalues Plot');
+scatter(real(eigs), imag(eigs), 100, 'b', 'filled');
+grid on;
+xlabel('Real Part');
+ylabel('Imag Part');
+title('Eigenvalues of OutputR ');
 
 
 
