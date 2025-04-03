@@ -301,24 +301,50 @@ ylabel('Phase(Rads)')
 title('Phase Spectrum, R = Out, B = In')
 grid on
 
-%subplot(3,1,2)
-%plot(omega, unwrap(angle(fftInput)), 'b')
-%xlabel('Frequency (rad/s)')
-%ylabel('Phase(Rads)')
-%title('Phase Spectrum IN')
-%grid on
+% Define time indices for transient and steady-state
+Nt_transient = floor(0.2 * Nt); % First 20% as transient
+Nt_steady = floor(0.8 * Nt);     % Last 20% as steady-state
 
-%subplot(3,1,3)
-%plot(omega, real(fftOutput), 'g', omega, imag(fftOutput), 'm')
-%xlabel('Frequency (rad/s)')
-%ylabel('Amplitude')
-%title('Real and Imaj parts FFTOUTPUT')
-%legend('Real', 'Imaj')
-%grid on
+% Extract signal portions
+OutputR_transient = OutputR(1:Nt_transient);
+OutputR_steady = OutputR(Nt_steady:end);
 
-%figure('Name', 'Kappa vs Z')
-%plot(z, kappa, 'p')
-%xlabel('z')
-%ylabel('Kappa')
-%grid on
-%}
+% Compute FFT for transient and steady-state
+fftOutput_transient = fftshift(fft(OutputR_transient));
+fftOutput_steady = fftshift(fft(OutputR_steady));
+
+% Compute frequency axis for correct scaling
+omega_transient = fftshift(wspace(time(1:Nt_transient)));
+omega_steady = fftshift(wspace(time(Nt_steady:end)));
+
+% Plot FFT Magnitude for transient vs steady-state
+figure;
+subplot(2,1,1);
+plot(omega_transient, 20*log10(abs(fftOutput_transient)), 'r');
+xlabel('Frequency (rad/s)');
+ylabel('Magnitude (dB)');
+title('FFT Magnitude - Transient');
+grid on;
+
+subplot(2,1,2);
+plot(omega_steady, 20*log10(abs(fftOutput_steady)), 'b');
+xlabel('Frequency (rad/s)');
+ylabel('Magnitude (dB)');
+title('FFT Magnitude - Steady-State');
+grid on;
+
+% Plot FFT Phase for transient vs steady-state
+figure;
+subplot(2,1,1);
+plot(omega_transient, unwrap(angle(fftOutput_transient)), 'r');
+xlabel('Frequency (rad/s)');
+ylabel('Phase (radians)');
+title('FFT Phase - Transient');
+grid on;
+
+subplot(2,1,2);
+plot(omega_steady, unwrap(angle(fftOutput_steady)), 'b');
+xlabel('Frequency (rad/s)');
+ylabel('Phase (radians)');
+title('FFT Phase - Steady-State');
+grid on;
