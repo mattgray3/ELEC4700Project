@@ -1,4 +1,4 @@
-% Milestone 8 Matt Gray 101183570 ELEC 4700 Project 
+% Milestone 9 Matt Gray 101183570 ELEC 4700 Project 
 
 %Default setup for plotting
 set(0,'defaultaxesfontsize', 20)
@@ -16,9 +16,9 @@ c_mu_0 = 1/c_eps_0/c_c^2; % uo
 c_q = 1.60217653e-19; % electron charge
 c_hb = 1.05457266913e-34; %plancks constant
 c_h = c_hb*2*pi; %reduced plancks constant
-kappa0 = 0*100; % Milestone3 --> Kappa constant imaginary part of effective refractive index
-kappaStart = .49;
-kappaStop = .51;
+kappa0 = 100; % Milestone3 --> Kappa constant imaginary part of effective refractive index
+kappaStart = .4;
+kappaStop = .6;
 
 
 %Input parameters for L and R constants
@@ -307,43 +307,25 @@ title('State Space Analysis of Laser OutputR (RE Vs Im)');
 legend('Trajectory', 'Start', 'End','Location','southeastoutside');
 
 
-figure('Name', 'Frequency Domain Analysis')
+% Define time indices for transient and steady-state
+Nt_steady = floor(0.8 * Nt);     
+% Extract signal portions
+OutputR_steady = OutputR(Nt_steady:end);
 
-subplot(2,1,1)
-plot(omega, 20*log10(abs(fftOutput)), 'r', omega, 20*log10(abs(fftInput)), 'b')
-xlabel('Frequency (rad/s)')
-ylabel('Magnitude')
-title('Mag Spectrum, R = Out, B = In')
-grid on
+% Compute FFT for transient and steady-state
 
-subplot(2,1,2)
-plot(omega, unwrap(angle(fftOutput)), 'r', omega, unwrap(angle(fftInput)), 'b' )
-xlabel('Frequency (rad/s)')
-ylabel('Phase(Rads)')
-title('Phase Spectrum, R = Out, B = In')
-grid on
+fftOutput_steady = fftshift(fft(OutputR_steady));
+% Compute frequency axis for correct scaling
+omega_steady = fftshift(wspace(time(Nt_steady:end)));
+
+% Plot FFT Magnitude for transient vs steady-state
+figure;
+
+plot(omega_steady, 20*log10(abs(fftOutput_steady)), 'b');
+xlabel('Frequency (rad/s)');
+ylabel('Magnitude (dB)');
+title('FFT Magnitude - Steady-State');
+grid on;
 
 
 
-%subplot(3,1,2)
-%plot(omega, unwrap(angle(fftInput)), 'b')
-%xlabel('Frequency (rad/s)')
-%ylabel('Phase(Rads)')
-%title('Phase Spectrum IN')
-%grid on
-
-%subplot(3,1,3)
-%plot(omega, real(fftOutput), 'g', omega, imag(fftOutput), 'm')
-%xlabel('Frequency (rad/s)')
-%ylabel('Amplitude')
-%title('Real and Imaj parts FFTOUTPUT')
-%legend('Real', 'Imaj')
-%grid on
-
-%figure('Name', 'Kappa vs Z')
-%plot(z, kappa, 'p')
-%xlabel('z')
-%ylabel('Kappa')
-%grid on
-%}
-clear all;
